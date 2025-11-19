@@ -8,10 +8,22 @@ const mongoose = require('mongoose');
 const OpenAI = require('openai');
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:3000', 
+  'https://ivyx-test-2.onrender.com/ivyscore'
+];
+
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: function(origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed'));
+    }
+  },
   credentials: true
 }));
+
 app.use(express.json());
 
 const openai = new OpenAI({
