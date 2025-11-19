@@ -116,7 +116,7 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
             email: formData.email,
             password: formData.password
           };
-
+      console.log(API_URL)
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
