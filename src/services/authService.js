@@ -1,11 +1,13 @@
 // src/services/authService.js
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
+//const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = 'https://ivyx-test.onrender.com/api';
+console.log(API_URL)
 // Sign Up
 export const signUp = async (userData) => {
+  
   try {
-    console.log(API_URL)
+    
     const response = await fetch(`${API_URL}/auth/signup`, {
       method: 'POST',
       headers: {
@@ -33,6 +35,7 @@ export const signUp = async (userData) => {
 // Sign In
 export const signIn = async (email, password) => {
   try {
+    console.log(API_URL)
     const response = await fetch(`${API_URL}/auth/login`, {
       method: 'POST',
       headers: {
@@ -48,6 +51,7 @@ export const signIn = async (email, password) => {
     }
 
     // Store token and user
+    localStorage.setItem('temp',API_URL);
     localStorage.setItem('ivyx_token', data.token);
     localStorage.setItem('ivyx_currentUser', JSON.stringify(data.user));
 

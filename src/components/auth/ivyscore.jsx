@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Eye, EyeOff, Mail, Lock, User, GraduationCap, Globe } from 'lucide-react';
-
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 // Auth Modal Component (no background, just the card)
 const AuthModal = ({ onClose, onAuthSuccess }) => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -117,7 +117,7 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
             password: formData.password
           };
 
-      const response = await fetch(`http://localhost:5000${endpoint}`, {
+      const response = await fetch(`${API_URL}${endpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
