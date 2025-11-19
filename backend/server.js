@@ -10,7 +10,7 @@ const app = express();
 
 const allowedOrigins = [
   'http://localhost:3000', 
-  'https://ivyx-test-2.onrender.com/ivyscore'
+  'https://ivyx-test-2.onrender.com'
 ];
 
 app.use(cors({
