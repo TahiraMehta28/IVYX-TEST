@@ -663,7 +663,7 @@ IMPORTANT: You MUST respond with ONLY a valid JSON object (no markdown, no extra
 }`;
 
     try {
-      const response = await fetch("http://localhost:5000/api/generate", {
+      const response = await fetch(`${API_URL}/api/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
