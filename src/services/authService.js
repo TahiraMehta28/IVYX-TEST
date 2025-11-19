@@ -5,6 +5,7 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 // Sign Up
 export const signUp = async (userData) => {
   try {
+    console.log(API_URL)
     const response = await fetch(`${API_URL}/auth/signup`, {
       method: 'POST',
       headers: {
