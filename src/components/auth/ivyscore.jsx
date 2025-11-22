@@ -665,7 +665,7 @@ IMPORTANT: You MUST respond with ONLY a valid JSON object (no markdown, no extra
   try {
     // STEP 1: Generate AI Assessment
     console.log('🤖 Generating AI assessment...');
-    const response = await fetch(`${API_URL}/api/generate`, {
+    const response = await fetch(`${API_URL}api/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -735,7 +735,7 @@ IMPORTANT: You MUST respond with ONLY a valid JSON object (no markdown, no extra
         console.log('💾 Auto-saving assessment to database...');
         console.log('📝 User ID:', userId);
         
-        const saveResponse = await fetch(`${API_URL}/api/history/save`, {
+        const saveResponse = await fetch(`${API_URL}api/history/save`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
