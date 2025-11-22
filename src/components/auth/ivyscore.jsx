@@ -621,11 +621,11 @@ function IvyScoreCalculator({ user, onLogout }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const calculateIvyScore = async () => {
-    setLoading(true);
-    setResults(null);
+ const calculateIvyScore = async () => {
+  setLoading(true);
+  setResults(null);
 
-    const prompt = `You are an expert college admissions counselor specializing in Ivy League and prestigious universities. Analyze this student profile and provide a comprehensive assessment.
+  const prompt = `You are an expert college admissions counselor specializing in Ivy League and prestigious universities. Analyze this student profile and provide a comprehensive assessment.
 
 STUDENT: ${currentUser.fullName} from ${currentUser.country || 'Not specified'}
 
@@ -662,70 +662,113 @@ IMPORTANT: You MUST respond with ONLY a valid JSON object (no markdown, no extra
   ]
 }`;
 
-    try {
-      const response = await fetch(`${API_URL}api/generate`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt })
-      });
+  try {
+    // STEP 1: Generate AI Assessment
+    console.log('🤖 Generating AI assessment...');
+    const response = await fetch(`${API_URL}/api/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt })
+    });
 
-      const data = await response.json();
-      
-      if (!data.success) {
-        throw new Error(data.message || 'API Error');
-      }
-
-      let parsedResults;
-      try {
-        const cleanedResponse = data.reply.replace(/```json\n?|\n?```/g, '').trim();
-        parsedResults = JSON.parse(cleanedResponse);
-        setIsAIGenerated(true);
-      } catch (e) {
-        console.error('JSON Parse Error:', e);
-        setIsAIGenerated(false);
-        parsedResults = {
-          overallScore: 75,
-          academicScore: 80,
-          extracurricularScore: 70,
-          summary: "Based on the provided information, you show strong academic foundation with room for growth in extracurricular depth and standardized testing.",
-          strengths: [
-            "Consistent academic performance across grades",
-            "Demonstrated commitment to education",
-            "Well-rounded profile with multiple interests",
-            "Clear potential for growth"
-          ],
-          improvements: [
-            "Increase depth in 2-3 key extracurricular activities",
-            "Develop stronger leadership roles with measurable impact",
-            "Focus on SAT/ACT preparation to reach 1500+ range",
-            "Build a more distinctive specialized excellence area"
-          ],
-          recommendations: [
-            "Take 4-6 AP courses in areas aligned with your intended major",
-            "Seek leadership positions in your top 2 extracurriculars",
-            "Start a passion project that demonstrates innovation",
-            "Dedicate 3-4 months to intensive SAT prep"
-          ],
-          targetSchools: [
-            { name: "Top State Universities (UC Berkeley, UMich, UVA)", reasoning: "Strong match for current profile" },
-            { name: "Selective Liberal Arts Colleges", reasoning: "Holistic admissions may favor your approach" },
-            { name: "Target Ivy League Schools (Cornell, Brown)", reasoning: "Competitive with improvements" },
-            { name: "Honors Programs at Strong Universities", reasoning: "Excellent opportunities with merit aid" }
-          ]
-        };
-      }
-
-      setResults(parsedResults);
-    } catch (error) {
-      console.error('Error:', error);
-      alert(`Error: ${error.message}\n\nPlease make sure your backend server is running on http://localhost:5000`);
-    } finally {
-      setLoading(false);
+    const data = await response.json();
+    
+    if (!data.success) {
+      throw new Error(data.message || 'API Error');
     }
-  };
 
+    // STEP 2: Parse AI Results
+    let parsedResults;
+    try {
+      const cleanedResponse = data.reply.replace(/```json\n?|\n?```/g, '').trim();
+      parsedResults = JSON.parse(cleanedResponse);
+      setIsAIGenerated(true);
+      console.log('✅ AI Results parsed successfully');
+    } catch (e) {
+      console.error('JSON Parse Error:', e);
+      setIsAIGenerated(false);
+      parsedResults = {
+        overallScore: 75,
+        academicScore: 80,
+        extracurricularScore: 70,
+        summary: "Based on the provided information, you show strong academic foundation with room for growth in extracurricular depth and standardized testing.",
+        strengths: [
+          "Consistent academic performance across grades",
+          "Demonstrated commitment to education",
+          "Well-rounded profile with multiple interests",
+          "Clear potential for growth"
+        ],
+        improvements: [
+          "Increase depth in 2-3 key extracurricular activities",
+          "Develop stronger leadership roles with measurable impact",
+          "Focus on SAT/ACT preparation to reach 1500+ range",
+          "Build a more distinctive specialized excellence area"
+        ],
+        recommendations: [
+          "Take 4-6 AP courses in areas aligned with your intended major",
+          "Seek leadership positions in your top 2 extracurriculars",
+          "Start a passion project that demonstrates innovation",
+          "Dedicate 3-4 months to intensive SAT prep"
+        ],
+        targetSchools: [
+          { name: "Top State Universities (UC Berkeley, UMich, UVA)", reasoning: "Strong match for current profile" },
+          { name: "Selective Liberal Arts Colleges", reasoning: "Holistic admissions may favor your approach" },
+          { name: "Target Ivy League Schools (Cornell, Brown)", reasoning: "Competitive with improvements" },
+          { name: "Honors Programs at Strong Universities", reasoning: "Excellent opportunities with merit aid" }
+        ]
+      };
+    }
+
+    // STEP 3: Display Results
+    setResults(parsedResults);
+
+    // STEP 4: ✨ AUTO-SAVE TO DATABASE ✨
+    const savedUser = localStorage.getItem('user');
+    
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser);
+        const userId = userData.id;
+        
+        console.log('💾 Auto-saving assessment to database...');
+        console.log('📝 User ID:', userId);
+        
+        const saveResponse = await fetch(`${API_URL}/api/history/save`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            userId: userId,
+            formData: formData,
+            results: parsedResults
+          })
+        });
+
+        const saveData = await saveResponse.json();
+        
+        if (saveData.success) {
+          console.log('✅ ✅ ✅ ASSESSMENT SAVED SUCCESSFULLY!');
+          console.log('📊 Total assessments for this user:', saveData.totalAssessments);
+        } else {
+          console.error('❌ Failed to save assessment:', saveData.message);
+        }
+      } catch (saveError) {
+        console.error('❌ Error saving assessment:', saveError);
+      }
+    } else {
+      console.warn('⚠️ No user found in localStorage. Assessment not saved.');
+    }
+
+  } catch (error) {
+    console.error('❌ Error:', error);
+    alert(`Error: ${error.message}\n\nPlease make sure your backend server is running.`);
+  } finally {
+    setLoading(false);
+  }
+};
   const handleSubmit = () => {
     if (!formData.grade9 && !formData.grade10 && !formData.grade11) {
       alert('Please fill in at least your grade scores to get an assessment.');
