@@ -103,7 +103,7 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
     setIsLoading(true);
     
     try {
-      const endpoint = isSignUp ? 'api/auth/signup' : 'api/auth/login';
+      const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/login';
       const payload = isSignUp 
         ? { 
             fullName: formData.fullName,
