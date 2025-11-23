@@ -34,9 +34,6 @@ const openai = new OpenAI({
 // MONGODB CONNECTION
 // ============================================
 
-// MONGODB CONNECTION
-// ============================================
-
 if (!process.env.MONGODB_URI) {
   console.error("❌ MONGODB_URI is missing in environment variables!");
   process.exit(1);
@@ -60,7 +57,7 @@ mongoose.connect(process.env.MONGODB_URI, {
 const userSchema = new mongoose.Schema({
   fullName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
-  password: { type: String, required: true }, // In production: use bcrypt
+  password: { type: String, required: true },
   grade: { type: String, required: true },
   country: { type: String, required: true },
   createdAt: { type: Date, default: Date.now }
@@ -99,8 +96,22 @@ const assessmentSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+// Coach Booking Schema
+const coachBookingSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phone: { type: String, required: true },
+  purpose: { type: String, required: true },
+  preferredDate: { type: String, required: true },
+  preferredTime: { type: String, required: true },
+  additionalNotes: { type: String },
+  status: { type: String, default: 'pending' },
+  createdAt: { type: Date, default: Date.now }
+});
+
 const User = mongoose.model('User', userSchema);
 const Assessment = mongoose.model('Assessment', assessmentSchema);
+const CoachBooking = mongoose.model('CoachBooking', coachBookingSchema);
 
 // ============================================
 // AUTH ENDPOINTS
@@ -118,7 +129,6 @@ app.post('/api/auth/signup', async (req, res) => {
       });
     }
     
-    // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ 
@@ -126,11 +136,10 @@ app.post('/api/auth/signup', async (req, res) => {
       });
     }
     
-    // Create user
     const user = new User({ 
       fullName, 
       email, 
-      password, // In production: hash with bcrypt
+      password,
       grade, 
       country
     });
@@ -167,7 +176,6 @@ app.post('/api/auth/login', async (req, res) => {
       });
     }
     
-    // Find user
     const user = await User.findOne({ email, password });
     
     if (!user) {
@@ -470,12 +478,103 @@ app.get('/api/history/:userId/stats', async (req, res) => {
 });
 
 // ============================================
+// COACH BOOKING ENDPOINTS
+// ============================================
+
+app.post('/api/book-coach', async (req, res) => {
+  try {
+    const { name, email, phone, purpose, preferredDate, preferredTime, additionalNotes } = req.body;
+
+    console.log('📅 Coach booking request:', { name, email, purpose });
+
+    if (!name || !email || !phone || !purpose || !preferredDate || !preferredTime) {
+      return res.status(400).json({ 
+        success: false,
+        message: 'All required fields must be filled' 
+      });
+    }
+
+    const booking = new CoachBooking({
+      name,
+      email,
+      phone,
+      purpose,
+      preferredDate,
+      preferredTime,
+      additionalNotes
+    });
+
+    await booking.save();
+    
+    console.log('✅ Coach booking saved to MongoDB');
+
+    res.json({ 
+      success: true,
+      message: 'Booking saved successfully',
+      bookingId: booking._id
+    });
+
+  } catch (error) {
+    console.error('❌ Coach booking error:', error);
+    res.status(500).json({ 
+      success: false,
+      message: 'Failed to save booking: ' + error.message
+    });
+  }
+});
+
+// Get all coach bookings (for admin)
+app.get('/api/bookings', async (req, res) => {
+  try {
+    const bookings = await CoachBooking.find().sort({ createdAt: -1 });
+    const totalBookings = await CoachBooking.countDocuments();
+    
+    res.json({
+      success: true,
+      bookings,
+      total: totalBookings
+    });
+  } catch (error) {
+    console.error('❌ Get bookings error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// Update booking status
+app.patch('/api/bookings/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    const booking = await CoachBooking.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+    
+    res.json({
+      success: true,
+      booking
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+// ============================================
 // HEALTH CHECK
 // ============================================
 
 app.get('/', async (req, res) => {
   const totalUsers = await User.countDocuments();
   const totalAssessments = await Assessment.countDocuments();
+  const totalBookings = await CoachBooking.countDocuments();
   
   res.json({ 
     status: 'Server is running',
@@ -495,11 +594,17 @@ app.get('/', async (req, res) => {
         'GET /api/history/:userId/stats',
         'DELETE /api/history/:userId/:assessmentId',
         'DELETE /api/history/:userId'
+      ],
+      coaching: [
+        'POST /api/book-coach',
+        'GET /api/bookings',
+        'PATCH /api/bookings/:id'
       ]
     },
     stats: {
       totalUsers,
-      totalAssessments
+      totalAssessments,
+      totalBookings
     }
   });
 });
@@ -519,6 +624,7 @@ app.listen(PORT, () => {
   console.log(`✅ Auth endpoints ready`);
   console.log(`✅ AI endpoint ready`);
   console.log(`✅ History endpoints ready (MongoDB)`);
+  console.log(`✅ Coach booking endpoints ready`);
   console.log(`🔑 OpenAI API Key: ${process.env.OPENAI_API_KEY ? '✅ Configured' : '❌ NOT CONFIGURED'}`);
   console.log('='.repeat(60));
   console.log('');

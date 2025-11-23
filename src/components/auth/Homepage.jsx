@@ -962,9 +962,9 @@ export default function IvyXLandingPage() {
             <button className="btn-primary" onClick={handleGetStarted}>
               Get Started Today <ChevronRight size={20} />
             </button>
-            <button className="btn-secondary" onClick={handleGetStarted}>
-              Book a Coach
-            </button>
+           <button className="btn-secondary" onClick={() => navigate('/book-coach')}>
+  Book a Coach
+</button>
           </div>
           <div className="features-grid">
             <div className="feature-card">
@@ -1145,9 +1145,9 @@ export default function IvyXLandingPage() {
             <button className="btn-primary" onClick={handleGetStarted}>
               Get Started Today <ChevronRight size={20} />
             </button>
-            <button className="btn-secondary" onClick={handleGetStarted}>
-              Book a Coach
-            </button>
+           <button className="btn-secondary" onClick={() => navigate('/book-coach')}>
+  Book a Coach
+</button>
           </div>
         </div>
       </section>

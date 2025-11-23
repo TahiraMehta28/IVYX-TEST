@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Homepage from './components/auth/Homepage';
 import IvyScoreCalculator from './components/auth/ivyscore';
+import CoachBooking from './components/auth/CoachBooking';
 import './App.css';
 
 function App() {
@@ -17,7 +18,7 @@ function App() {
 
         {/* Redirect /auth to /ivyscore since auth is handled within IvyScore */}
         <Route path="/auth" element={<Navigate to="/ivyscore" replace />} />
-
+<Route path="/book-coach" element={<CoachBooking />} />
         {/* Catch all - redirect to homepage */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
