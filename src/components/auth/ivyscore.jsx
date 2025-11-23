@@ -103,7 +103,7 @@ const AuthModal = ({ onClose, onAuthSuccess }) => {
     setIsLoading(true);
     
     try {
-      const endpoint = isSignUp ? 'api/auth/signup' : 'api/auth/login';
+      const endpoint = isSignUp ? '/api/auth/signup' : '/api/auth/login';
       const payload = isSignUp 
         ? { 
             fullName: formData.fullName,
@@ -557,6 +557,7 @@ const App = () => {
 
 // Ivy Score Calculator Component (imported from your third document)
 function IvyScoreCalculator({ user, onLogout }) {
+   const navigate = useNavigate(); // ADD THIS LINE
   const [expandedCard, setExpandedCard] = useState(null);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState(null);
@@ -1266,7 +1267,7 @@ const handleNewAssessment = () => {
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-green-900 to-blue-900 text-white rounded-2xl p-8 shadow-xl">
+<div className="bg-gradient-to-r from-green-900 to-blue-900 text-white rounded-2xl p-8 shadow-xl">
               <div className="text-center">
                 <h3 className="text-3xl font-bold mb-4">You Have What It Takes! 🎓</h3>
                 <p className="text-lg text-green-50 leading-relaxed max-w-3xl mx-auto mb-6">
@@ -1308,7 +1309,32 @@ const handleNewAssessment = () => {
 </button>
               </div>
             </div>
+
+            {/* 👇 ADD THIS NEW SECTION HERE 👇 */}
+        {/* Book a Coach Section - Clean & Smooth */}
+            <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-purple-200">
+              <div className="max-w-2xl mx-auto text-center">
+                <h3 className="text-3xl font-bold text-gray-900 mb-3">
+                  Need Expert Guidance?
+                </h3>
+                <p className="text-gray-600 text-lg mb-6">
+                  Get personalized coaching from Ivy League admission experts
+                </p>
+                <button 
+                  onClick={() => navigate('/book-coach')}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold px-10 py-4 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 inline-flex items-center gap-3"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Book a Coach Session
+                </button>
+              </div>
+            </div>
+            {/* 👆 END OF NEW SECTION 👆 */}
+
           </div>
+          
         )}
       </main>
 
