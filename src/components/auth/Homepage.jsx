@@ -340,13 +340,16 @@ export default function IvyXLandingPage() {
           transform: translateY(-3px);
         }
 
-        /* Features Grid */
-        .features-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 2rem;
-          margin-top: 3rem;
-        }
+       /* Features Grid */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+}
 
         .feature-card {
           background: rgba(255, 255, 255, 0.1);
